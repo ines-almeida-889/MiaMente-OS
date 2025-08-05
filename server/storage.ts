@@ -5,9 +5,13 @@ import {
   type Clinic, type InsertClinic,
   type Session, type InsertSession,
   type Claim, type InsertClaim,
-  type Document, type InsertDocument
+  type Document, type InsertDocument,
+  users, children, intakeForms, clinics, sessions, claims, documents
 } from "@shared/schema";
 import { randomUUID } from "crypto";
+import { drizzle } from "drizzle-orm/neon-http";
+import { neon } from "@neondatabase/serverless";
+import { eq, and } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -56,334 +60,444 @@ export interface IStorage {
   deleteDocument(id: string): Promise<boolean>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User> = new Map();
-  private children: Map<string, Child> = new Map();
-  private intakeForms: Map<string, IntakeForm> = new Map();
-  private clinics: Map<string, Clinic> = new Map();
-  private sessions: Map<string, Session> = new Map();
-  private claims: Map<string, Claim> = new Map();
-  private documents: Map<string, Document> = new Map();
+// Initialize Supabase connection
+const sql = neon(process.env.SUPABASE_DATABASE_URL || process.env.DATABASE_URL!);
+const db = drizzle(sql);
 
+export class SupabaseStorage implements IStorage {
   constructor() {
     this.seedData();
   }
 
-  private seedData() {
-    // Create sample users
-    const parentUser: User = {
-      id: "parent-1",
-      username: "sarah.johnson",
-      password: "password123",
-      role: "parent",
-      name: "Sarah Johnson",
-      email: "sarah@example.com",
-      createdAt: new Date(),
-    };
+  private async seedData() {
+    try {
+      // Check if data already exists
+      const existingUsers = await db.select().from(users).limit(1);
+      if (existingUsers.length > 0) {
+        return; // Data already seeded
+      }
 
-    const clinicUser: User = {
-      id: "clinic-1",
-      username: "dr.martinez",
-      password: "password123",
-      role: "clinic",
-      name: "Dr. Martinez",
-      email: "martinez@clinic.com",
-      createdAt: new Date(),
-    };
+      // Create sample users
+      const sampleUsers = [
+        {
+          id: "parent-1",
+          username: "sarah.johnson",
+          password: "password123",
+          role: "parent",
+          name: "Sarah Johnson",
+          email: "sarah@example.com",
+        },
+        {
+          id: "clinic-1",
+          username: "dr.martinez",
+          password: "password123",
+          role: "clinic",
+          name: "Dr. Martinez",
+          email: "martinez@clinic.com",
+        },
+        {
+          id: "insurance-1",
+          username: "admin.ndis",
+          password: "password123",
+          role: "insurance",
+          name: "NDIS Admin",
+          email: "admin@ndis.gov.au",
+        }
+      ];
 
-    const insuranceUser: User = {
-      id: "insurance-1",
-      username: "admin.ndis",
-      password: "password123",
-      role: "insurance",
-      name: "NDIS Admin",
-      email: "admin@ndis.gov.au",
-      createdAt: new Date(),
-    };
+      await db.insert(users).values(sampleUsers);
 
-    this.users.set(parentUser.id, parentUser);
-    this.users.set(clinicUser.id, clinicUser);
-    this.users.set(insuranceUser.id, insuranceUser);
+      // Create sample child
+      await db.insert(children).values([{
+        id: "child-1",
+        parentId: "parent-1",
+        name: "Emma Johnson",
+        dateOfBirth: new Date("2017-03-15"),
+        gender: "female",
+        primaryLanguage: "English",
+        currentDiagnosis: "Autism Spectrum Disorder",
+        diagnosisDate: new Date("2020-01-15"),
+        diagnosingProfessional: "Dr. Smith",
+        ndisStatus: "approved",
+      }]);
 
-    // Create sample child
-    const child: Child = {
-      id: "child-1",
-      parentId: "parent-1",
-      name: "Emma Johnson",
-      dateOfBirth: new Date("2017-03-15"),
-      gender: "female",
-      primaryLanguage: "English",
-      currentDiagnosis: "Autism Spectrum Disorder",
-      diagnosisDate: new Date("2020-01-15"),
-      diagnosingProfessional: "Dr. Smith",
-      ndisStatus: "approved",
-      createdAt: new Date(),
-    };
+      // Create sample clinic
+      await db.insert(clinics).values([{
+        id: "clinic-1",
+        userId: "clinic-1",
+        name: "Sunshine Therapy Center",
+        specialization: "Speech Therapy",
+        address: "123 Main St, Sydney NSW 2000",
+        distance: "2.3",
+        rating: "4.8",
+        availability: "available",
+      }]);
 
-    this.children.set(child.id, child);
+      // Create sample session
+      await db.insert(sessions).values([{
+        id: "session-1",
+        childId: "child-1",
+        clinicId: "clinic-1",
+        sessionType: "Speech Therapy",
+        scheduledDate: new Date(),
+        status: "scheduled",
+        notes: "",
+        goalsAchieved: false,
+        homeworkAssigned: false,
+      }]);
 
-    // Create sample clinic
-    const clinic: Clinic = {
-      id: "clinic-1",
-      userId: "clinic-1",
-      name: "Sunshine Therapy Center",
-      specialization: "Speech Therapy",
-      address: "123 Main St, Sydney NSW 2000",
-      distance: "2.3",
-      rating: "4.8",
-      availability: "available",
-      createdAt: new Date(),
-    };
+      // Create sample claim
+      await db.insert(claims).values([{
+        id: "claim-1",
+        claimNumber: "NDIS-2024-0312-001",
+        childId: "child-1",
+        clinicId: "clinic-1",
+        amount: "2840.00",
+        status: "pending",
+        submittedDate: new Date(),
+        reviewedDate: null,
+        period: "Feb 1-28, 2024",
+        priority: "normal",
+      }]);
 
-    this.clinics.set(clinic.id, clinic);
-
-    // Create sample sessions
-    const session: Session = {
-      id: "session-1",
-      childId: "child-1",
-      clinicId: "clinic-1",
-      sessionType: "Speech Therapy",
-      scheduledDate: new Date(),
-      status: "scheduled",
-      notes: "",
-      goalsAchieved: false,
-      homeworkAssigned: false,
-      createdAt: new Date(),
-    };
-
-    this.sessions.set(session.id, session);
-
-    // Create sample claims
-    const claim: Claim = {
-      id: "claim-1",
-      claimNumber: "NDIS-2024-0312-001",
-      childId: "child-1",
-      clinicId: "clinic-1",
-      amount: "2840.00",
-      status: "pending",
-      submittedDate: new Date(),
-      reviewedDate: null,
-      period: "Feb 1-28, 2024",
-      priority: "normal",
-      createdAt: new Date(),
-    };
-
-    this.claims.set(claim.id, claim);
+      console.log("Sample data seeded successfully");
+    } catch (error) {
+      console.error("Error seeding data:", error);
+    }
   }
 
   // User methods
   async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+    try {
+      const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+      return result[0];
+    } catch (error) {
+      console.error("Error getting user:", error);
+      return undefined;
+    }
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.username === username);
+    try {
+      const result = await db.select().from(users).where(eq(users.username, username)).limit(1);
+      return result[0];
+    } catch (error) {
+      console.error("Error getting user by username:", error);
+      return undefined;
+    }
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.email === email);
+    try {
+      const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+      return result[0];
+    } catch (error) {
+      console.error("Error getting user by email:", error);
+      return undefined;
+    }
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { 
-      ...insertUser, 
-      id,
-      createdAt: new Date(),
-    };
-    this.users.set(id, user);
-    return user;
+    try {
+      const result = await db.insert(users).values(insertUser).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Error creating user:", error);
+      throw error;
+    }
   }
 
   // Child methods
   async getChild(id: string): Promise<Child | undefined> {
-    return this.children.get(id);
+    try {
+      const result = await db.select().from(children).where(eq(children.id, id)).limit(1);
+      return result[0];
+    } catch (error) {
+      console.error("Error getting child:", error);
+      return undefined;
+    }
   }
 
   async getChildrenByParent(parentId: string): Promise<Child[]> {
-    return Array.from(this.children.values()).filter(child => child.parentId === parentId);
+    try {
+      const result = await db.select().from(children).where(eq(children.parentId, parentId));
+      return result;
+    } catch (error) {
+      console.error("Error getting children by parent:", error);
+      return [];
+    }
   }
 
   async createChild(insertChild: InsertChild): Promise<Child> {
-    const id = randomUUID();
-    const child: Child = { 
-      ...insertChild, 
-      id,
-      createdAt: new Date(),
-    };
-    this.children.set(id, child);
-    return child;
+    try {
+      const result = await db.insert(children).values(insertChild).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Error creating child:", error);
+      throw error;
+    }
   }
 
   async updateChild(id: string, updates: Partial<Child>): Promise<Child | undefined> {
-    const child = this.children.get(id);
-    if (child) {
-      const updatedChild = { ...child, ...updates };
-      this.children.set(id, updatedChild);
-      return updatedChild;
+    try {
+      const result = await db.update(children).set(updates).where(eq(children.id, id)).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Error updating child:", error);
+      return undefined;
     }
-    return undefined;
   }
 
   // Intake form methods
   async getIntakeForm(childId: string): Promise<IntakeForm | undefined> {
-    return Array.from(this.intakeForms.values()).find(form => form.childId === childId);
+    try {
+      const result = await db.select().from(intakeForms).where(eq(intakeForms.childId, childId)).limit(1);
+      return result[0];
+    } catch (error) {
+      console.error("Error getting intake form:", error);
+      return undefined;
+    }
   }
 
   async createIntakeForm(insertForm: InsertIntakeForm): Promise<IntakeForm> {
-    const id = randomUUID();
-    const form: IntakeForm = { 
-      ...insertForm, 
-      id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    this.intakeForms.set(id, form);
-    return form;
+    try {
+      const result = await db.insert(intakeForms).values(insertForm).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Error creating intake form:", error);
+      throw error;
+    }
   }
 
   async updateIntakeForm(id: string, updates: Partial<IntakeForm>): Promise<IntakeForm | undefined> {
-    const form = this.intakeForms.get(id);
-    if (form) {
-      const updatedForm = { ...form, ...updates, updatedAt: new Date() };
-      this.intakeForms.set(id, updatedForm);
-      return updatedForm;
+    try {
+      const result = await db.update(intakeForms).set(updates).where(eq(intakeForms.id, id)).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Error updating intake form:", error);
+      return undefined;
     }
-    return undefined;
   }
 
   // Clinic methods
   async getAllClinics(): Promise<Clinic[]> {
-    return Array.from(this.clinics.values());
+    try {
+      const result = await db.select().from(clinics);
+      return result;
+    } catch (error) {
+      console.error("Error getting all clinics:", error);
+      return [];
+    }
   }
 
   async getClinic(id: string): Promise<Clinic | undefined> {
-    return this.clinics.get(id);
+    try {
+      const result = await db.select().from(clinics).where(eq(clinics.id, id)).limit(1);
+      return result[0];
+    } catch (error) {
+      console.error("Error getting clinic:", error);
+      return undefined;
+    }
   }
 
   async getClinicByUserId(userId: string): Promise<Clinic | undefined> {
-    return Array.from(this.clinics.values()).find(clinic => clinic.userId === userId);
+    try {
+      const result = await db.select().from(clinics).where(eq(clinics.userId, userId)).limit(1);
+      return result[0];
+    } catch (error) {
+      console.error("Error getting clinic by user ID:", error);
+      return undefined;
+    }
   }
 
   async createClinic(insertClinic: InsertClinic): Promise<Clinic> {
-    const id = randomUUID();
-    const clinic: Clinic = { 
-      ...insertClinic, 
-      id,
-      createdAt: new Date(),
-    };
-    this.clinics.set(id, clinic);
-    return clinic;
+    try {
+      const result = await db.insert(clinics).values(insertClinic).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Error creating clinic:", error);
+      throw error;
+    }
   }
 
   // Session methods
   async getSession(id: string): Promise<Session | undefined> {
-    return this.sessions.get(id);
+    try {
+      const result = await db.select().from(sessions).where(eq(sessions.id, id)).limit(1);
+      return result[0];
+    } catch (error) {
+      console.error("Error getting session:", error);
+      return undefined;
+    }
   }
 
   async getSessionsByChild(childId: string): Promise<Session[]> {
-    return Array.from(this.sessions.values()).filter(session => session.childId === childId);
+    try {
+      const result = await db.select().from(sessions).where(eq(sessions.childId, childId));
+      return result;
+    } catch (error) {
+      console.error("Error getting sessions by child:", error);
+      return [];
+    }
   }
 
   async getSessionsByClinic(clinicId: string): Promise<Session[]> {
-    return Array.from(this.sessions.values()).filter(session => session.clinicId === clinicId);
+    try {
+      const result = await db.select().from(sessions).where(eq(sessions.clinicId, clinicId));
+      return result;
+    } catch (error) {
+      console.error("Error getting sessions by clinic:", error);
+      return [];
+    }
   }
 
   async getTodaysSessionsByClinic(clinicId: string): Promise<Session[]> {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    
-    return Array.from(this.sessions.values()).filter(session => 
-      session.clinicId === clinicId && 
-      session.scheduledDate >= today && 
-      session.scheduledDate < tomorrow
-    );
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      const result = await db.select().from(sessions).where(
+        and(
+          eq(sessions.clinicId, clinicId),
+          // Note: For proper date filtering, you might need to use SQL functions
+          // This is a simplified version
+        )
+      );
+      
+      // Filter in memory for now - in production you'd use proper SQL date functions
+      return result.filter(session => 
+        session.scheduledDate >= today && 
+        session.scheduledDate < tomorrow
+      );
+    } catch (error) {
+      console.error("Error getting today's sessions by clinic:", error);
+      return [];
+    }
   }
 
   async createSession(insertSession: InsertSession): Promise<Session> {
-    const id = randomUUID();
-    const session: Session = { 
-      ...insertSession, 
-      id,
-      createdAt: new Date(),
-    };
-    this.sessions.set(id, session);
-    return session;
+    try {
+      const result = await db.insert(sessions).values(insertSession).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Error creating session:", error);
+      throw error;
+    }
   }
 
   async updateSession(id: string, updates: Partial<Session>): Promise<Session | undefined> {
-    const session = this.sessions.get(id);
-    if (session) {
-      const updatedSession = { ...session, ...updates };
-      this.sessions.set(id, updatedSession);
-      return updatedSession;
+    try {
+      const result = await db.update(sessions).set(updates).where(eq(sessions.id, id)).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Error updating session:", error);
+      return undefined;
     }
-    return undefined;
   }
 
   // Claim methods
   async getClaim(id: string): Promise<Claim | undefined> {
-    return this.claims.get(id);
+    try {
+      const result = await db.select().from(claims).where(eq(claims.id, id)).limit(1);
+      return result[0];
+    } catch (error) {
+      console.error("Error getting claim:", error);
+      return undefined;
+    }
   }
 
   async getAllClaims(): Promise<Claim[]> {
-    return Array.from(this.claims.values());
+    try {
+      const result = await db.select().from(claims);
+      return result;
+    } catch (error) {
+      console.error("Error getting all claims:", error);
+      return [];
+    }
   }
 
   async getPendingClaims(): Promise<Claim[]> {
-    return Array.from(this.claims.values()).filter(claim => claim.status === "pending");
+    try {
+      const result = await db.select().from(claims).where(eq(claims.status, "pending"));
+      return result;
+    } catch (error) {
+      console.error("Error getting pending claims:", error);
+      return [];
+    }
   }
 
   async getClaimsByChild(childId: string): Promise<Claim[]> {
-    return Array.from(this.claims.values()).filter(claim => claim.childId === childId);
+    try {
+      const result = await db.select().from(claims).where(eq(claims.childId, childId));
+      return result;
+    } catch (error) {
+      console.error("Error getting claims by child:", error);
+      return [];
+    }
   }
 
   async createClaim(insertClaim: InsertClaim): Promise<Claim> {
-    const id = randomUUID();
-    const claim: Claim = { 
-      ...insertClaim, 
-      id,
-      createdAt: new Date(),
-    };
-    this.claims.set(id, claim);
-    return claim;
+    try {
+      const result = await db.insert(claims).values(insertClaim).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Error creating claim:", error);
+      throw error;
+    }
   }
 
   async updateClaim(id: string, updates: Partial<Claim>): Promise<Claim | undefined> {
-    const claim = this.claims.get(id);
-    if (claim) {
-      const updatedClaim = { ...claim, ...updates };
-      this.claims.set(id, updatedClaim);
-      return updatedClaim;
+    try {
+      const result = await db.update(claims).set(updates).where(eq(claims.id, id)).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Error updating claim:", error);
+      return undefined;
     }
-    return undefined;
   }
 
   // Document methods
   async getDocument(id: string): Promise<Document | undefined> {
-    return this.documents.get(id);
+    try {
+      const result = await db.select().from(documents).where(eq(documents.id, id)).limit(1);
+      return result[0];
+    } catch (error) {
+      console.error("Error getting document:", error);
+      return undefined;
+    }
   }
 
   async getDocumentsByChild(childId: string): Promise<Document[]> {
-    return Array.from(this.documents.values()).filter(doc => doc.childId === childId);
+    try {
+      const result = await db.select().from(documents).where(eq(documents.childId, childId));
+      return result;
+    } catch (error) {
+      console.error("Error getting documents by child:", error);
+      return [];
+    }
   }
 
   async createDocument(insertDocument: InsertDocument): Promise<Document> {
-    const id = randomUUID();
-    const document: Document = { 
-      ...insertDocument, 
-      id,
-      createdAt: new Date(),
-    };
-    this.documents.set(id, document);
-    return document;
+    try {
+      const result = await db.insert(documents).values(insertDocument).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Error creating document:", error);
+      throw error;
+    }
   }
 
   async deleteDocument(id: string): Promise<boolean> {
-    return this.documents.delete(id);
+    try {
+      const result = await db.delete(documents).where(eq(documents.id, id)).returning();
+      return result.length > 0;
+    } catch (error) {
+      console.error("Error deleting document:", error);
+      return false;
+    }
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new SupabaseStorage();

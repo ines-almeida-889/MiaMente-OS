@@ -65,7 +65,7 @@ The authentication manager handles role switching for demo purposes and maintain
 - **Vite**: Build tool and development server
 
 ## Database & ORM
-- **Neon Database**: Serverless PostgreSQL hosting (@neondatabase/serverless)
+- **Supabase**: PostgreSQL database hosting (replacing Neon)
 - **Drizzle ORM**: Type-safe database toolkit with PostgreSQL dialect
 - **Drizzle Kit**: Migration and schema management tools
 
