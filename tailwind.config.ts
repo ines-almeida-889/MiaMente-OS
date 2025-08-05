@@ -5,6 +5,10 @@ export default {
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Poppins', 'sans-serif'],
+        poppins: ['Poppins', 'sans-serif'],
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -44,6 +48,11 @@ export default {
         border: "var(--border)",
         input: "var(--input)",
         ring: "var(--ring)",
+        // Mia Mente Brand Colors
+        'mia-navy': "var(--mia-navy)",
+        'mia-pink': "var(--mia-pink)",
+        'mia-blue': "var(--mia-blue)",
+        'mia-yellow': "var(--mia-yellow)",
         chart: {
           "1": "var(--chart-1)",
           "2": "var(--chart-2)",

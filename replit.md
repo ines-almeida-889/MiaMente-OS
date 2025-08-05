@@ -6,6 +6,17 @@ HealthConnect is a comprehensive healthcare management platform that connects pa
 
 Preferred communication style: Simple, everyday language.
 
+## Branding Guidelines
+- **Brand Name**: Mia Mente (replaces HealthConnect)
+- **Typography**: Poppins font family for headings and body text
+- **Color Palette**: 
+  - Primary Navy: #3a4d7a (hsl(230, 39%, 28%))
+  - Pink Coral: #f5b7c7 (hsl(347, 57%, 81%))
+  - Light Blue: #52b9e8 (hsl(197, 71%, 60%))
+  - Bright Yellow: #f5e56b (hsl(50, 85%, 76%))
+- **Design Elements**: Wonky pink circles for background, rounded corners, friendly icons
+- **UI Style**: Clean, modern, child-friendly with soft colors and gentle animations
+
 # System Architecture
 
 ## Frontend Architecture

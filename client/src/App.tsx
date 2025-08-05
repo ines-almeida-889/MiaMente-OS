@@ -12,7 +12,7 @@ import ClinicDashboard from "@/pages/clinic-dashboard";
 import InsuranceDashboard from "@/pages/insurance-dashboard";
 import IntakeForm from "@/pages/intake-form";
 import NotFound from "@/pages/not-found";
-import { Heart } from "lucide-react";
+import { Brain, Heart, Smile, Moon, Star } from "lucide-react";
 
 function Layout({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState(authManager.getState().user);
@@ -35,14 +35,19 @@ function Layout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background wonky-circles">
       {/* Navigation Header */}
-      <nav className="bg-white border-b border-slate-200 px-4 lg:px-6 py-3">
+      <nav className="relative bg-white/95 backdrop-blur-sm border-b border-mia-pink/20 px-4 lg:px-6 py-4 z-10">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <Heart className="h-6 w-6 text-primary-500" />
-              <span className="text-xl font-bold text-slate-900">HealthConnect</span>
+            <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-1">
+                <Brain className="h-7 w-7 text-mia-navy" />
+                <Smile className="h-5 w-5 text-mia-pink" />
+              </div>
+              <div className="mia-logo text-2xl text-mia-navy">
+                mia mente
+              </div>
             </div>
           </div>
           
@@ -51,7 +56,7 @@ function Layout({ children }: { children: React.ReactNode }) {
       </nav>
 
       {/* Main Content */}
-      <main>
+      <main className="relative z-10">
         {children}
       </main>
 

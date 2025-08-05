@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { authManager } from "@/lib/auth";
-import { User } from "lucide-react";
+import { User, Smile, Heart, Shield } from "lucide-react";
 
 interface RoleSwitcherProps {
   onRoleChange?: (role: string) => void;
@@ -45,21 +45,52 @@ export function RoleSwitcher({ onRoleChange }: RoleSwitcherProps) {
     }
   };
 
+  const getRoleIcon = (role: string) => {
+    switch (role) {
+      case 'parent':
+        return <Heart className="h-4 w-4 text-mia-pink" />;
+      case 'clinic':
+        return <Smile className="h-4 w-4 text-mia-blue" />;
+      case 'insurance':
+        return <Shield className="h-4 w-4 text-mia-yellow" />;
+      default:
+        return <User className="h-4 w-4" />;
+    }
+  };
+
   return (
     <div className="flex items-center space-x-4">
       <Select value={currentRole} onValueChange={handleRoleChange}>
-        <SelectTrigger className="w-[180px] bg-slate-100 border-slate-300">
-          <SelectValue placeholder="Select role" />
+        <SelectTrigger className="w-[200px] bg-white/90 border-mia-pink/20 hover:border-mia-pink/40 transition-colors shadow-sm">
+          <div className="flex items-center space-x-2">
+            {getRoleIcon(currentRole)}
+            <SelectValue placeholder="Select role" />
+          </div>
         </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="parent">Parent Dashboard</SelectItem>
-          <SelectItem value="clinic">Clinic Dashboard</SelectItem>
-          <SelectItem value="insurance">Insurance Dashboard</SelectItem>
+        <SelectContent className="bg-white/95 backdrop-blur-sm border-mia-pink/20">
+          <SelectItem value="parent" className="hover:bg-mia-pink/10">
+            <div className="flex items-center space-x-2">
+              <Heart className="h-4 w-4 text-mia-pink" />
+              <span>Parent Dashboard</span>
+            </div>
+          </SelectItem>
+          <SelectItem value="clinic" className="hover:bg-mia-blue/10">
+            <div className="flex items-center space-x-2">
+              <Smile className="h-4 w-4 text-mia-blue" />
+              <span>Clinic Dashboard</span>
+            </div>
+          </SelectItem>
+          <SelectItem value="insurance" className="hover:bg-mia-yellow/10">
+            <div className="flex items-center space-x-2">
+              <Shield className="h-4 w-4 text-mia-yellow" />
+              <span>Insurance Dashboard</span>
+            </div>
+          </SelectItem>
         </SelectContent>
       </Select>
       
-      <div className="flex items-center space-x-2 bg-slate-100 hover:bg-slate-200 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition-colors cursor-pointer">
-        <User className="h-4 w-4" />
+      <div className="flex items-center space-x-2 bg-white/90 hover:bg-mia-pink/5 rounded-xl px-4 py-2 text-sm font-medium text-mia-navy transition-colors cursor-pointer shadow-sm border border-mia-pink/20">
+        <User className="h-4 w-4 text-mia-blue" />
         <span>{user?.name || 'User'}</span>
       </div>
     </div>
