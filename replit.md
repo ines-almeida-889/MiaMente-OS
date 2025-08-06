@@ -11,11 +11,11 @@ Preferred communication style: Simple, everyday language.
 - **Typography**: Poppins font family for headings and body text
 - **Color Palette**: 
   - Primary Navy: #3a4d7a (hsl(230, 39%, 28%))
-  - Pink Coral: #f5b7c7 (hsl(347, 57%, 81%))
-  - Light Blue: #52b9e8 (hsl(197, 71%, 60%))
-  - Bright Yellow: #f5e56b (hsl(50, 85%, 76%))
-- **Design Elements**: Wonky pink circles for background, rounded corners, friendly icons
-- **UI Style**: Clean, modern, child-friendly with soft colors and gentle animations
+  - Soft Coral Pink: #ffccc7 (hsl(14, 100%, 85%))
+  - Light Blue: #b3e0ff (hsl(204, 100%, 86%))
+  - Light Purple: #e0ccff (hsl(258, 100%, 91%))
+- **Design Elements**: Wonky pink circles for background, rounded corners, minimal icons
+- **UI Style**: Clean, modern, child-friendly with soft colors, light gradients, and subtle animations
 
 # System Architecture
 

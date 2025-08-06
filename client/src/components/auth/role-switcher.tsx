@@ -52,7 +52,7 @@ export function RoleSwitcher({ onRoleChange }: RoleSwitcherProps) {
       case 'clinic':
         return <Smile className="h-4 w-4 text-mia-blue" />;
       case 'insurance':
-        return <Shield className="h-4 w-4 text-mia-yellow" />;
+        return <Shield className="h-4 w-4 text-mia-purple" />;
       default:
         return <User className="h-4 w-4" />;
     }
@@ -80,9 +80,9 @@ export function RoleSwitcher({ onRoleChange }: RoleSwitcherProps) {
               <span>Clinic Dashboard</span>
             </div>
           </SelectItem>
-          <SelectItem value="insurance" className="hover:bg-mia-yellow/10">
+          <SelectItem value="insurance" className="hover:bg-mia-purple/10">
             <div className="flex items-center space-x-2">
-              <Shield className="h-4 w-4 text-mia-yellow" />
+              <Shield className="h-4 w-4 text-mia-purple" />
               <span>Insurance Dashboard</span>
             </div>
           </SelectItem>

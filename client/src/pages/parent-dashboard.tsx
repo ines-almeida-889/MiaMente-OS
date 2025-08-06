@@ -8,18 +8,14 @@ import {
   FileText, 
   Calendar, 
   TrendingUp, 
-  DollarSign, 
   Plus, 
   Upload, 
   Search, 
   FileDown,
-  User,
-  UserCheck,
   Clock,
   Heart,
-  Smile,
-  Star,
-  CheckCircle
+  CheckCircle,
+  User
 } from "lucide-react";
 
 export default function ParentDashboard() {
@@ -49,8 +45,8 @@ export default function ParentDashboard() {
       title: "Progress Reports",
       value: "12",
       icon: TrendingUp,
-      iconColor: "text-mia-yellow",
-      bgColor: "bg-mia-yellow/10"
+      iconColor: "text-mia-purple",
+      bgColor: "bg-mia-purple/10"
     },
     {
       title: "Subsidy Status",
@@ -65,7 +61,7 @@ export default function ParentDashboard() {
   const activities = [
     {
       id: 1,
-      icon: Smile,
+      icon: CheckCircle,
       iconColor: "bg-mia-blue text-white",
       title: "Session completed with Dr. Martinez",
       description: "Speech therapy session - 2 hours ago",
@@ -73,7 +69,7 @@ export default function ParentDashboard() {
     },
     {
       id: 2,
-      icon: Star,
+      icon: FileText,
       iconColor: "bg-mia-pink text-white",
       title: "Progress report uploaded",
       description: "Monthly assessment completed",
@@ -81,8 +77,8 @@ export default function ParentDashboard() {
     },
     {
       id: 3,
-      icon: Heart,
-      iconColor: "bg-mia-yellow text-mia-navy",
+      icon: Calendar,
+      iconColor: "bg-mia-purple text-white",
       title: "Appointment scheduled",
       description: "Next session: March 15, 2024",
       time: "3d"
@@ -104,7 +100,7 @@ export default function ParentDashboard() {
       provider: "Dr. Chen",
       date: "March 18, 2024 at 10:00 AM",
       status: "Pending",
-      statusColor: "bg-mia-yellow/10 text-mia-navy border border-mia-yellow/30"
+      statusColor: "bg-mia-purple/10 text-mia-navy border border-mia-purple/30"
     }
   ];
 
@@ -137,7 +133,7 @@ export default function ParentDashboard() {
           <Card className="border-mia-pink/20 bg-white/80 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="text-xl font-semibold text-mia-navy flex items-center space-x-2">
-                <Star className="h-5 w-5 text-mia-yellow" />
+                <Heart className="h-5 w-5 text-mia-pink" />
                 <span>Quick Actions</span>
               </CardTitle>
             </CardHeader>
@@ -172,10 +168,10 @@ export default function ParentDashboard() {
                 </Button>
                 
                 <Button
-                  className="flex items-center space-x-3 p-4 bg-mia-yellow/10 hover:bg-mia-yellow/20 border border-mia-yellow/30 text-left h-auto justify-start transition-all hover:scale-105"
+                  className="flex items-center space-x-3 p-4 bg-mia-purple/10 hover:bg-mia-purple/20 border border-mia-purple/30 text-left h-auto justify-start transition-all hover:scale-105"
                   variant="outline"
                 >
-                  <div className="bg-mia-yellow rounded-xl p-2">
+                  <div className="bg-mia-purple rounded-xl p-2">
                     <Search className="h-4 w-4 text-mia-navy" />
                   </div>
                   <div>
@@ -230,52 +226,58 @@ export default function ParentDashboard() {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Child Profile */}
-          <Card>
+          <Card className="border-mia-pink/20 bg-white/80 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="text-lg font-semibold text-slate-900">Child Profile</CardTitle>
+              <CardTitle className="text-xl font-semibold text-mia-navy flex items-center space-x-2">
+                <Heart className="h-5 w-5 text-mia-pink" />
+                <span>Child Profile</span>
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-center mb-4">
-                <div className="w-16 h-16 bg-slate-200 rounded-full mx-auto mb-3 flex items-center justify-center">
-                  <User className="h-8 w-8 text-slate-400" />
+                <div className="w-16 h-16 bg-mia-pink/20 rounded-full mx-auto mb-3 flex items-center justify-center">
+                  <User className="h-8 w-8 text-mia-navy" />
                 </div>
-                <h4 className="font-medium text-slate-900">Emma Johnson</h4>
-                <p className="text-sm text-slate-600">Age 7</p>
+                <h4 className="font-medium text-mia-navy">Emma Johnson</h4>
+                <p className="text-sm text-mia-navy/70">Age 7</p>
               </div>
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-600">Condition:</span>
-                  <span className="font-medium text-slate-900">Autism Spectrum</span>
+                  <span className="text-mia-navy/70">Condition:</span>
+                  <span className="font-medium text-mia-navy">Autism Spectrum</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-600">NDIS Plan:</span>
-                  <span className="font-medium text-green-600">Active</span>
+                  <span className="text-mia-navy/70">NDIS Plan:</span>
+                  <span className="font-medium text-mia-blue">Active</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-600">Progress:</span>
-                  <span className="font-medium text-slate-900">On Track</span>
+                  <span className="text-mia-navy/70">Progress:</span>
+                  <span className="font-medium text-mia-navy">On Track</span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Upcoming Appointments */}
-          <Card>
+          <Card className="border-mia-pink/20 bg-white/80 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="text-lg font-semibold text-slate-900">Upcoming Appointments</CardTitle>
+              <CardTitle className="text-xl font-semibold text-mia-navy flex items-center space-x-2">
+                <Calendar className="h-5 w-5 text-mia-blue" />
+                <span>Upcoming Appointments</span>
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {appointments.map((appointment) => (
-                  <div key={appointment.id} className="border border-slate-200 rounded-lg p-3">
+                  <div key={appointment.id} className="border border-mia-pink/10 rounded-xl p-4 bg-gradient-to-r from-white/60 to-mia-blue/5 hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-slate-900">{appointment.type}</span>
-                      <span className={`text-xs px-2 py-1 rounded ${appointment.statusColor}`}>
+                      <span className="text-sm font-medium text-mia-navy">{appointment.type}</span>
+                      <span className={`text-xs px-3 py-1 rounded-full font-medium ${appointment.statusColor}`}>
                         {appointment.status}
                       </span>
                     </div>
-                    <p className="text-xs text-slate-600">{appointment.provider}</p>
-                    <p className="text-xs text-slate-600">{appointment.date}</p>
+                    <p className="text-xs text-mia-navy/70">{appointment.provider}</p>
+                    <p className="text-xs text-mia-navy/70">{appointment.date}</p>
                   </div>
                 ))}
               </div>

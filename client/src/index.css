@@ -4,11 +4,11 @@
 @tailwind utilities;
 
 :root {
-  /* Mia Mente Brand Colors */
+  /* Mia Mente Brand Colors - Updated Palette */
   --mia-navy: hsl(230, 39%, 28%);      /* #3a4d7a - Primary navy */
-  --mia-pink: hsl(347, 57%, 81%);      /* #f5b7c7 - Pink coral */
-  --mia-blue: hsl(197, 71%, 60%);      /* #52b9e8 - Light blue */
-  --mia-yellow: hsl(50, 85%, 76%);     /* #f5e56b - Bright yellow */
+  --mia-pink: hsl(14, 100%, 85%);      /* #ffccc7 - Soft coral pink */
+  --mia-blue: hsl(204, 100%, 86%);     /* #b3e0ff - Light blue */
+  --mia-purple: hsl(258, 100%, 91%);   /* #e0ccff - Light purple */
   
   /* Theme Variables */
   --background: hsl(0, 0%, 100%);
@@ -33,7 +33,7 @@
   --radius: 1rem;
   --success: hsl(142, 71%, 45%);
   --success-foreground: hsl(355, 7%, 97%);
-  --warning: var(--mia-yellow);
+  --warning: var(--mia-purple);
   --warning-foreground: var(--mia-navy);
 }
 
@@ -52,14 +52,14 @@
   --primary-foreground: var(--mia-navy);
   --secondary: var(--mia-pink);
   --secondary-foreground: var(--mia-navy);
-  --accent: var(--mia-yellow);
+  --accent: var(--mia-purple);
   --accent-foreground: var(--mia-navy);
   --destructive: hsl(0, 62%, 50%);
   --destructive-foreground: hsl(0, 0%, 100%);
   --ring: var(--mia-blue);
   --success: hsl(142, 71%, 45%);
   --success-foreground: hsl(355, 7%, 97%);
-  --warning: var(--mia-yellow);
+  --warning: var(--mia-purple);
   --warning-foreground: var(--mia-navy);
 }
 
@@ -83,12 +83,12 @@
 .mia-navy { color: var(--mia-navy); }
 .mia-pink { color: var(--mia-pink); }
 .mia-blue { color: var(--mia-blue); }
-.mia-yellow { color: var(--mia-yellow); }
+.mia-purple { color: var(--mia-purple); }
 
 .bg-mia-navy { background-color: var(--mia-navy); }
 .bg-mia-pink { background-color: var(--mia-pink); }
 .bg-mia-blue { background-color: var(--mia-blue); }
-.bg-mia-yellow { background-color: var(--mia-yellow); }
+.bg-mia-purple { background-color: var(--mia-purple); }
 
 /* Wonky Pink Circles Background */
 .wonky-circles {

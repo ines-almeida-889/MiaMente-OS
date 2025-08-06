@@ -52,7 +52,7 @@ export default {
         'mia-navy': "var(--mia-navy)",
         'mia-pink': "var(--mia-pink)",
         'mia-blue': "var(--mia-blue)",
-        'mia-yellow': "var(--mia-yellow)",
+        'mia-purple': "var(--mia-purple)",
         chart: {
           "1": "var(--chart-1)",
           "2": "var(--chart-2)",
