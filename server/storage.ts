@@ -94,14 +94,6 @@ export class SupabaseStorage implements IStorage {
           role: "clinic",
           name: "Dr. Martinez",
           email: "martinez@clinic.com",
-        },
-        {
-          id: "insurance-1",
-          username: "admin.ndis",
-          password: "password123",
-          role: "insurance",
-          name: "NDIS Admin",
-          email: "admin@ndis.gov.au",
         }
       ];
 

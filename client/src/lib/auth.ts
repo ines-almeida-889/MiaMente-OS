@@ -69,7 +69,7 @@ class AuthManager {
     this.notify();
   }
 
-  async switchRole(role: 'parent' | 'clinic' | 'insurance'): Promise<void> {
+  async switchRole(role: 'parent' | 'clinic'): Promise<void> {
     // Mock role switching - in a real app this would be more secure
     const mockUsers = {
       parent: {
@@ -86,14 +86,6 @@ class AuthManager {
         role: "clinic" as const,
         name: "Dr. Martinez",
         email: "martinez@clinic.com",
-        createdAt: new Date(),
-      },
-      insurance: {
-        id: "insurance-1",
-        username: "admin.ndis",
-        role: "insurance" as const,
-        name: "NDIS Admin",
-        email: "admin@ndis.gov.au",
         createdAt: new Date(),
       },
     };

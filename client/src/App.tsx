@@ -9,10 +9,9 @@ import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { authManager } from "@/lib/auth";
 import ParentDashboard from "@/pages/parent-dashboard";
 import ClinicDashboard from "@/pages/clinic-dashboard";
-import InsuranceDashboard from "@/pages/insurance-dashboard";
 import IntakeForm from "@/pages/intake-form";
 import NotFound from "@/pages/not-found";
-import { Brain, Heart, Smile, Moon, Star } from "lucide-react";
+import { Brain, Smile } from "lucide-react";
 
 function Layout({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState(authManager.getState().user);
@@ -90,8 +89,6 @@ function Router() {
         return <ParentDashboard />;
       case 'clinic':
         return <ClinicDashboard />;
-      case 'insurance':
-        return <InsuranceDashboard />;
       default:
         return <ParentDashboard />;
     }

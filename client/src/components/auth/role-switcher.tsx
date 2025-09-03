@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { authManager } from "@/lib/auth";
-import { User, Smile, Heart, Shield } from "lucide-react";
+import { User, Smile, Heart } from "lucide-react";
 
 interface RoleSwitcherProps {
   onRoleChange?: (role: string) => void;
@@ -24,7 +24,7 @@ export function RoleSwitcher({ onRoleChange }: RoleSwitcherProps) {
 
   const handleRoleChange = async (role: string) => {
     try {
-      await authManager.switchRole(role as 'parent' | 'clinic' | 'insurance');
+      await authManager.switchRole(role as 'parent' | 'clinic');
       setCurrentRole(role);
       onRoleChange?.(role);
     } catch (error) {
@@ -32,18 +32,6 @@ export function RoleSwitcher({ onRoleChange }: RoleSwitcherProps) {
     }
   };
 
-  const getRoleDisplayName = (role: string) => {
-    switch (role) {
-      case 'parent':
-        return 'Parent Dashboard';
-      case 'clinic':
-        return 'Clinic Dashboard';
-      case 'insurance':
-        return 'Insurance Dashboard';
-      default:
-        return 'Select Role';
-    }
-  };
 
   const getRoleIcon = (role: string) => {
     switch (role) {
@@ -51,8 +39,6 @@ export function RoleSwitcher({ onRoleChange }: RoleSwitcherProps) {
         return <Heart className="h-4 w-4 text-mia-pink" />;
       case 'clinic':
         return <Smile className="h-4 w-4 text-mia-blue" />;
-      case 'insurance':
-        return <Shield className="h-4 w-4 text-mia-purple" />;
       default:
         return <User className="h-4 w-4" />;
     }
@@ -78,12 +64,6 @@ export function RoleSwitcher({ onRoleChange }: RoleSwitcherProps) {
             <div className="flex items-center space-x-2">
               <Smile className="h-4 w-4 text-mia-blue" />
               <span>Clinic Dashboard</span>
-            </div>
-          </SelectItem>
-          <SelectItem value="insurance" className="hover:bg-mia-purple/10">
-            <div className="flex items-center space-x-2">
-              <Shield className="h-4 w-4 text-mia-purple" />
-              <span>Insurance Dashboard</span>
             </div>
           </SelectItem>
         </SelectContent>

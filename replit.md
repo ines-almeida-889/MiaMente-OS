@@ -1,6 +1,6 @@
 # Overview
 
-HealthConnect is a comprehensive healthcare management platform that connects parents, clinics, and insurance providers in a unified ecosystem. The application facilitates child healthcare management through intake forms, appointment scheduling, session tracking, claims processing, and document management. It features role-based dashboards for different user types (parents, clinics, insurance) and provides a streamlined workflow for healthcare service delivery and reimbursement.
+HealthConnect is a comprehensive healthcare management platform that connects parents and clinics in a unified ecosystem. The application facilitates child healthcare management through intake forms, appointment scheduling, session tracking, and document management. It features role-based dashboards for different user types (parents, clinics) and provides a streamlined workflow for healthcare service delivery.
 
 # User Preferences
 
@@ -27,7 +27,7 @@ The client is built with React and TypeScript using Vite as the build tool. The 
 - **State Management**: React Query (TanStack Query) for server state management with custom query client
 - **Routing**: wouter for lightweight client-side routing
 - **Forms**: React Hook Form with Zod validation for form handling
-- **Role-Based Views**: Separate dashboard components for parent, clinic, and insurance user roles
+- **Role-Based Views**: Separate dashboard components for parent and clinic user roles
 
 The frontend uses a clean separation between UI components (`/components/ui`), feature components (`/components`), and pages (`/pages`). Path aliases are configured for clean imports with `@/` pointing to the client source directory.
 
@@ -56,7 +56,6 @@ Role-based authentication system supporting three user types:
 
 - **Parent Role**: Manage children, view sessions, handle intake forms
 - **Clinic Role**: Manage patients, conduct sessions, generate reports
-- **Insurance Role**: Process claims, manage approvals, track subsidies
 
 The authentication manager handles role switching for demo purposes and maintains user state across the application.
 
@@ -65,7 +64,6 @@ The authentication manager handles role switching for demo purposes and maintain
 - **File Upload System**: Document management with drag-and-drop interface
 - **Dashboard Analytics**: Role-specific metrics and statistics
 - **Session Management**: Appointment scheduling and progress tracking
-- **Claims Processing**: Insurance claim submission and approval workflow
 
 # External Dependencies
 
