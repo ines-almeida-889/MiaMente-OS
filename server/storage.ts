@@ -9,8 +9,8 @@ import {
   users, children, intakeForms, clinics, sessions, claims, documents
 } from "@shared/schema";
 import { randomUUID } from "crypto";
-import { drizzle } from "drizzle-orm/neon-http";
-import { neon } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 import { eq, and } from "drizzle-orm";
 
 export interface IStorage {
@@ -60,31 +60,19 @@ export interface IStorage {
   deleteDocument(id: string): Promise<boolean>;
 }
 
-// Force fresh Supabase connection (avoid SDK caching)
-// Based on Neon documentation: use connection-per-request to avoid caching
-function createFreshDbConnection() {
-  const databaseUrl = process.env.SUPABASE_DATABASE_URL || process.env.DATABASE_URL!;
-  
-  // Ensure we have the correct AWS hostname
-  if (databaseUrl.includes('api.pooler.supabase.com')) {
-    console.error('❌ FOUND OLD HOSTNAME IN ENV VARS!');
-    console.error('Database URL still contains old hostname:', databaseUrl.substring(0, 80));
-    throw new Error('Environment variables still contain old Supabase hostname');
-  }
-  
-  // Add recommended parameters for fresh connection
-  const connectionString = databaseUrl.includes('?') 
-    ? `${databaseUrl}&connect_timeout=10&sslmode=require&channel_binding=require`
-    : `${databaseUrl}?connect_timeout=10&sslmode=require&channel_binding=require`;
-  
-  console.log('🔄 Creating fresh database connection to:', connectionString.substring(0, 80) + '...');
-  
-  // Create completely new connection instance every time
-  const sql = neon(connectionString);
-  return drizzle(sql);
-}
+// Initialize PostgreSQL connection using node-postgres
+const databaseUrl = process.env.SUPABASE_DATABASE_URL || process.env.DATABASE_URL!;
 
-const db = createFreshDbConnection();
+console.log('🔄 Creating PostgreSQL connection to:', databaseUrl.substring(0, 80) + '...');
+
+const pool = new Pool({
+  connectionString: databaseUrl,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
+
+const db = drizzle(pool);
 
 export class SupabaseStorage implements IStorage {
   constructor() {
