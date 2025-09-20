@@ -1,97 +1,30 @@
-# Overview
+# Mia-Mente-OS
 
-HealthConnect is a comprehensive healthcare management platform that connects parents and clinics in a unified ecosystem. The application facilitates child healthcare management through intake forms, appointment scheduling, session tracking, and document management. It features role-based dashboards for different user types (parents, clinics) and provides a streamlined workflow for healthcare service delivery.
+## Overview
 
-# User Preferences
+Mia-Mente-OS appears to be a new project in its initial stages. Based on the repository name, this likely represents an operating system or OS-like interface project called "Mia-Mente-OS". The repository currently contains minimal content with only a basic README file, indicating this is either a newly initialized project or a project template waiting for implementation.
+
+## User Preferences
 
 Preferred communication style: Simple, everyday language.
 
-## Branding Guidelines
-- **Brand Name**: Mia Mente (replaces HealthConnect)
-- **Typography**: Poppins font family for headings and body text
-- **Color Palette**: 
-  - Primary Navy: #3a4d7a (hsl(230, 39%, 28%))
-  - Soft Coral Pink: #ffccc7 (hsl(14, 100%, 85%))
-  - Light Blue: #b3e0ff (hsl(204, 100%, 86%))
-  - Light Purple: #e0ccff (hsl(258, 100%, 91%))
-- **Design Elements**: Wonky pink circles for background, rounded corners, minimal icons
-- **UI Style**: Clean, modern, child-friendly with soft colors, light gradients, and subtle animations
+## System Architecture
 
-# System Architecture
+Since the repository is in its early stages with minimal content, specific architectural decisions have not yet been implemented. The project appears to be a blank slate ready for development of an operating system or OS-interface application.
 
-## Frontend Architecture
-The client is built with React and TypeScript using Vite as the build tool. The architecture follows a component-based design with:
+Key considerations for future architecture:
+- **Frontend Framework**: No frontend framework has been selected yet
+- **Backend Structure**: No backend architecture is currently defined
+- **Core OS Components**: System-level components and interfaces are yet to be designed
+- **User Interface**: UI/UX patterns and design system are not yet established
+- **File System**: File management and storage architecture is not yet implemented
+- **Process Management**: Application and process handling mechanisms are undefined
 
-- **UI Components**: Utilizes shadcn/ui component library built on Radix UI primitives for consistent design
-- **Styling**: Tailwind CSS with CSS variables for theming support
-- **State Management**: React Query (TanStack Query) for server state management with custom query client
-- **Routing**: wouter for lightweight client-side routing
-- **Forms**: React Hook Form with Zod validation for form handling
-- **Role-Based Views**: Separate dashboard components for parent and clinic user roles
+## External Dependencies
 
-The frontend uses a clean separation between UI components (`/components/ui`), feature components (`/components`), and pages (`/pages`). Path aliases are configured for clean imports with `@/` pointing to the client source directory.
-
-## Backend Architecture
-Express.js server with TypeScript providing RESTful API endpoints:
-
-- **API Structure**: Route handlers organized by domain (auth, users, children, sessions, claims, etc.)
-- **Middleware**: Request logging, JSON parsing, and error handling
-- **Development Setup**: Vite middleware integration for hot reloading in development
-- **Storage Layer**: Abstract storage interface allowing for pluggable data persistence implementations
-
-The server follows a layered architecture with route handlers delegating to storage services, maintaining separation of concerns between HTTP handling and business logic.
-
-## Data Storage
-PostgreSQL database with Drizzle ORM for type-safe database operations:
-
-- **Schema Design**: Relational model covering users, children, intake forms, clinics, sessions, claims, and documents
-- **Type Safety**: Drizzle generates TypeScript types from schema definitions
-- **Migration Support**: Drizzle Kit for database schema migrations
-- **Shared Types**: Common schema types shared between client and server via `/shared` directory
-
-The database schema supports multi-tenancy through user roles and maintains referential integrity across related entities.
-
-## Authentication & Authorization
-Role-based authentication system supporting three user types:
-
-- **Parent Role**: Manage children, view sessions, handle intake forms
-- **Clinic Role**: Manage patients, conduct sessions, generate reports
-
-The authentication manager handles role switching for demo purposes and maintains user state across the application.
-
-## Key Features
-- **Multi-Step Intake Forms**: Progressive form completion with save/resume functionality
-- **File Upload System**: Document management with drag-and-drop interface
-- **Dashboard Analytics**: Role-specific metrics and statistics
-- **Session Management**: Appointment scheduling and progress tracking
-
-# External Dependencies
-
-## Core Framework Dependencies
-- **React 18+**: Frontend framework with hooks and modern patterns
-- **Express.js**: Node.js web server framework
-- **TypeScript**: Type safety across full stack
-- **Vite**: Build tool and development server
-
-## Database & ORM
-- **Supabase**: PostgreSQL database hosting (replacing Neon)
-- **Drizzle ORM**: Type-safe database toolkit with PostgreSQL dialect
-- **Drizzle Kit**: Migration and schema management tools
-
-## UI & Styling
-- **Radix UI**: Headless component primitives for accessibility
-- **Tailwind CSS**: Utility-first CSS framework
-- **shadcn/ui**: Pre-built component library
-- **Lucide React**: Icon library
-
-## State Management & Data Fetching
-- **TanStack React Query**: Server state management and caching
-- **React Hook Form**: Form state management and validation
-- **Zod**: Runtime type validation and schema parsing
-
-## Development Tools
-- **Replit Integration**: Development environment plugins and error handling
-- **PostCSS**: CSS processing with Tailwind
-- **ESBuild**: Fast JavaScript bundler for production builds
-
-The application is configured for deployment on Replit with specific plugins for development experience and error overlay functionality.
+Currently, no external dependencies, third-party services, or integrations have been identified in the repository. Future development may require:
+- **Development Framework**: Choice of web technologies (React, Vue, etc.) or native development tools
+- **Backend Services**: Database solutions, authentication services, and API frameworks
+- **System Libraries**: OS-level APIs and system integration libraries
+- **UI Components**: Design system libraries and component frameworks
+- **Build Tools**: Compilation and deployment pipeline tools
