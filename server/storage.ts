@@ -61,7 +61,9 @@ export interface IStorage {
 }
 
 // Initialize Supabase connection
-const sql = neon(process.env.SUPABASE_DATABASE_URL || process.env.DATABASE_URL!);
+const databaseUrl = process.env.SUPABASE_DATABASE_URL || process.env.DATABASE_URL!;
+console.log('🔗 Database URL being used:', databaseUrl ? `${databaseUrl.split('@')[0]}@****` : 'NOT SET');
+const sql = neon(databaseUrl);
 const db = drizzle(sql);
 
 export class SupabaseStorage implements IStorage {
