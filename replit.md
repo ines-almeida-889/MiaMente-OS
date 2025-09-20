@@ -1,6 +1,6 @@
 # Overview
 
-HealthConnect is a comprehensive healthcare management platform that connects parents and clinics in a unified ecosystem. The application facilitates child healthcare management through intake forms, appointment scheduling, session tracking, and document management. It features role-based dashboards for different user types (parents, clinics) and provides a streamlined workflow for healthcare service delivery.
+Mia Mente is a comprehensive pediatric healthcare platform that connects parents seeking care for their children with qualified clinicians. The application features a streamlined onboarding flow where users choose their path (Individual/Parent or Clinician), complete role-specific forms, create accounts, and access tailored dashboards. The platform facilitates child healthcare management through intake forms, appointment scheduling, session tracking, and document management.
 
 # User Preferences
 
@@ -27,7 +27,7 @@ The client is built with React and TypeScript using Vite as the build tool. The 
 - **State Management**: React Query (TanStack Query) for server state management with custom query client
 - **Routing**: wouter for lightweight client-side routing
 - **Forms**: React Hook Form with Zod validation for form handling
-- **Role-Based Views**: Separate dashboard components for parent and clinic user roles
+- **Role-Based Views**: Separate dashboard components for parent and clinic user roles accessed through onboarding flow
 
 The frontend uses a clean separation between UI components (`/components/ui`), feature components (`/components`), and pages (`/pages`). Path aliases are configured for clean imports with `@/` pointing to the client source directory.
 
@@ -52,14 +52,17 @@ PostgreSQL database with Drizzle ORM for type-safe database operations:
 The database schema supports multi-tenancy through user roles and maintains referential integrity across related entities.
 
 ## Authentication & Authorization
-Role-based authentication system supporting three user types:
+Streamlined onboarding-based authentication system supporting two user types:
 
 - **Parent Role**: Manage children, view sessions, handle intake forms
 - **Clinic Role**: Manage patients, conduct sessions, generate reports
 
-The authentication manager handles role switching for demo purposes and maintains user state across the application.
+Users select their path from the home page, complete onboarding forms, create accounts, and are automatically directed to their appropriate dashboard. The authentication manager maintains user state and role throughout the application.
 
 ## Key Features
+- **BetterHelp-Style Home Page**: Clean selection interface with Individual and Clinician paths
+- **Role-Specific Onboarding**: Tailored forms collecting relevant information for each user type
+- **Account Creation Flow**: Streamlined signup process with role-appropriate branding
 - **Multi-Step Intake Forms**: Progressive form completion with save/resume functionality
 - **File Upload System**: Document management with drag-and-drop interface
 - **Dashboard Analytics**: Role-specific metrics and statistics
