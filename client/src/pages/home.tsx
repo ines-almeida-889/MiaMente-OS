@@ -80,8 +80,22 @@ export default function Home() {
           </Link>
         </div>
 
+        {/* Login Section */}
+        <div className="mt-8 text-center">
+          <p className="text-white/80 text-sm mb-4">Already have an account?</p>
+          <Link to="/login" data-testid="link-login">
+            <Button 
+              variant="outline" 
+              className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/40 transition-colors"
+              data-testid="button-login"
+            >
+              Sign In
+            </Button>
+          </Link>
+        </div>
+
         {/* Footer Text */}
-        <div className="mt-12 text-white/60 text-sm">
+        <div className="mt-8 text-white/60 text-sm">
           <p>Trusted by families and healthcare professionals across Australia</p>
         </div>
       </div>

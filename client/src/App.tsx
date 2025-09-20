@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/home";
+import Login from "@/pages/login";
 import ParentForm from "@/pages/parent-form";
 import ClinicianForm from "@/pages/clinician-form";
 import Signup from "@/pages/signup";
@@ -24,6 +25,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/login" component={Login} />
       <Route path="/parent-form" component={ParentForm} />
       <Route path="/clinician-form" component={ClinicianForm} />
       <Route path="/signup" component={Signup} />
