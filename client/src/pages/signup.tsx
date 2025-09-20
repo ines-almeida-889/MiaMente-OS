@@ -52,30 +52,46 @@ export default function Signup() {
 
     setIsSubmitting(true);
     try {
-      // Create user account with form data
+      // Create user account with API call to backend
       const userData = {
         username: data.username,
         password: data.password,
-        role: onboardingData.userType,
+        role: onboardingData.userType === "parent" ? "parent" : "clinic",
         name: onboardingData.userType === "parent" ? onboardingData.parentName : onboardingData.fullName,
         email: onboardingData.userType === "parent" ? onboardingData.parentEmail : onboardingData.email,
-        onboardingData: onboardingData
       };
 
-      // Switch to appropriate role
-      await authManager.switchRole(onboardingData.userType);
+      // Call the registration API
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userData),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to create account");
+      }
+
+      const result = await response.json();
+
+      // Update authentication state with real user data
+      authManager.setAuthenticatedUser(result.user);
 
       // Clear onboarding data
       localStorage.removeItem("onboardingData");
 
       // Navigate to appropriate dashboard
-      if (onboardingData.userType === "parent") {
+      if (result.user.role === "parent") {
         navigate("/parent-dashboard");
       } else {
         navigate("/clinic-dashboard");
       }
     } catch (error) {
       console.error("Signup error:", error);
+      alert(`Failed to create account: ${error instanceof Error ? error.message : "Unknown error"}`);
     } finally {
       setIsSubmitting(false);
     }

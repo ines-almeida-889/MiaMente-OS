@@ -112,6 +112,14 @@ class AuthManager {
     this.notify();
   }
 
+  setAuthenticatedUser(user: AuthUser): void {
+    this.state = {
+      user,
+      isAuthenticated: true,
+    };
+    this.notify();
+  }
+
   logout(): void {
     this.state = {
       user: null,

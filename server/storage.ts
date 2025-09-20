@@ -60,15 +60,20 @@ export interface IStorage {
   deleteDocument(id: string): Promise<boolean>;
 }
 
-// Initialize Supabase connection
-const databaseUrl = process.env.SUPABASE_DATABASE_URL || process.env.DATABASE_URL!;
-console.log('🔗 Database URL being used:', databaseUrl ? `${databaseUrl.split('@')[0]}@****` : 'NOT SET');
-const sql = neon(databaseUrl);
-const db = drizzle(sql);
+// Force fresh Supabase connection (avoid SDK caching)
+function createFreshDbConnection() {
+  const databaseUrl = process.env.SUPABASE_DATABASE_URL || process.env.DATABASE_URL!;
+  console.log('🔄 Creating fresh database connection to:', databaseUrl.substring(0, 60) + '...');
+  const sql = neon(databaseUrl);
+  return drizzle(sql);
+}
+
+const db = createFreshDbConnection();
 
 export class SupabaseStorage implements IStorage {
   constructor() {
-    this.seedData();
+    // Note: Seeding disabled to avoid connection issues at startup
+    // Data will be created as needed during normal operation
   }
 
   private async seedData() {
