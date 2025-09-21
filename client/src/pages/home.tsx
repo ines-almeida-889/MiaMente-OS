@@ -15,15 +15,14 @@ export default function Home() {
                 <Heart className="h-5 w-5 text-white" />
               </div>
             </div>
-            <div className="mia-logo text-4xl text-white">
-              mia mente
-            </div>
+            <div className="mia-logo text-4xl text-white"> mia mente</div>
           </div>
           <h1 className="text-3xl md:text-5xl font-bold text-white mb-4">
             Your child deserves the best care
           </h1>
           <p className="text-xl text-white/80 mb-8 max-w-2xl mx-auto">
-            Connect with trusted pediatric healthcare professionals or join our network of specialists
+            Connect with trusted pediatric healthcare professionals or join our
+            network of specialists
           </p>
         </div>
 
@@ -41,10 +40,12 @@ export default function Home() {
                     For Parents
                   </h2>
                   <p className="text-mia-navy/70 mb-6 leading-relaxed">
-                    Find the right specialist for your child's needs. Get personalized care recommendations and connect with trusted professionals.
+                    Find the right specialist for your child's needs. Get
+                    personalized care recommendations and connect with trusted
+                    professionals.
                   </p>
                 </div>
-                <Button 
+                <Button
                   className="w-full bg-mia-pink hover:bg-mia-pink/90 text-white font-semibold py-3 rounded-xl transition-colors"
                   data-testid="button-start-parent"
                 >
@@ -66,10 +67,11 @@ export default function Home() {
                     For Clinicians
                   </h2>
                   <p className="text-mia-navy/70 mb-6 leading-relaxed">
-                    Join our network of healthcare professionals. Connect with families and provide exceptional pediatric care.
+                    Join our network of healthcare professionals. Connect with
+                    families and provide exceptional pediatric care.
                   </p>
                 </div>
-                <Button 
+                <Button
                   className="w-full bg-mia-blue hover:bg-mia-blue/90 text-white font-semibold py-3 rounded-xl transition-colors"
                   data-testid="button-start-clinician"
                 >
@@ -84,8 +86,8 @@ export default function Home() {
         <div className="mt-8 text-center">
           <p className="text-white/80 text-sm mb-4">Already have an account?</p>
           <Link to="/login" data-testid="link-login">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/40 transition-colors"
               data-testid="button-login"
             >
@@ -96,7 +98,9 @@ export default function Home() {
 
         {/* Footer Text */}
         <div className="mt-8 text-white/60 text-sm">
-          <p>Trusted by families and healthcare professionals across Australia</p>
+          <p>
+            Trusted by families and healthcare professionals across Australia
+          </p>
         </div>
       </div>
     </div>
