@@ -12,6 +12,7 @@ import { randomUUID } from "crypto";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { eq, and } from "drizzle-orm";
+import { createClient } from "@supabase/supabase-js";
 
 export interface IStorage {
   // User methods
@@ -73,6 +74,12 @@ const pool = new Pool({
 });
 
 const db = drizzle(pool);
+
+// Initialize Supabase client for authentication
+const supabase = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_ANON_KEY!
+);
 
 export class SupabaseStorage implements IStorage {
   constructor() {
@@ -202,7 +209,37 @@ export class SupabaseStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     try {
-      const result = await db.insert(users).values(insertUser).returning();
+      // Create user in Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: insertUser.email,
+        password: insertUser.password,
+        options: {
+          data: {
+            name: insertUser.name,
+            role: insertUser.role,
+            username: insertUser.username
+          }
+        }
+      });
+
+      if (authError) {
+        console.error("Supabase auth error:", authError);
+        throw new Error(`Authentication error: ${authError.message}`);
+      }
+
+      if (!authData.user) {
+        throw new Error("Failed to create user in Supabase Auth");
+      }
+
+      // Create user in our database table with the same ID from Supabase Auth
+      const userToInsert = {
+        ...insertUser,
+        id: authData.user.id // Use Supabase Auth user ID
+      };
+
+      const result = await db.insert(users).values(userToInsert).returning();
+      console.log("✅ User created in both Supabase Auth and database:", result[0]);
+      
       return result[0];
     } catch (error) {
       console.error("Error creating user:", error);
