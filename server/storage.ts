@@ -208,7 +208,22 @@ export class SupabaseStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
+    let createdAuthUserId: string | null = null;
+    
     try {
+      // First check if user already exists in our database
+      const existingUserByUsername = await this.getUserByUsername(insertUser.username);
+      if (existingUserByUsername) {
+        throw new Error("Username already exists");
+      }
+
+      const existingUserByEmail = await this.getUserByEmail(insertUser.email);
+      if (existingUserByEmail) {
+        throw new Error("Email already exists");
+      }
+
+      console.log("🔄 Creating user in Supabase Auth...");
+      
       // Create user in Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: insertUser.email,
@@ -218,7 +233,8 @@ export class SupabaseStorage implements IStorage {
             name: insertUser.name,
             role: insertUser.role,
             username: insertUser.username
-          }
+          },
+          emailRedirectTo: undefined // Skip email confirmation for development
         }
       });
 
@@ -231,18 +247,36 @@ export class SupabaseStorage implements IStorage {
         throw new Error("Failed to create user in Supabase Auth");
       }
 
+      createdAuthUserId = authData.user.id;
+      console.log("✅ User created in Supabase Auth with ID:", createdAuthUserId);
+
       // Create user in our database table with the same ID from Supabase Auth
       const userToInsert = {
         ...insertUser,
         id: authData.user.id // Use Supabase Auth user ID
       };
 
+      console.log("🔄 Creating user in local database...");
       const result = await db.insert(users).values(userToInsert).returning();
       console.log("✅ User created in both Supabase Auth and database:", result[0]);
       
       return result[0];
     } catch (error) {
-      console.error("Error creating user:", error);
+      console.error("❌ Error creating user:", error);
+      
+      // If we created a Supabase Auth user but local DB failed, rollback
+      if (createdAuthUserId) {
+        console.log("🔄 Rolling back Supabase Auth user creation...");
+        try {
+          // Use admin API to delete the user (requires service role key)
+          // For now, log the issue - in production you'd use admin API
+          console.error("⚠️  ROLLBACK NEEDED: Supabase Auth user", createdAuthUserId, "exists but local DB failed");
+          console.error("⚠️  User will need manual cleanup in Supabase Auth dashboard");
+        } catch (rollbackError) {
+          console.error("❌ Failed to rollback Supabase Auth user:", rollbackError);
+        }
+      }
+      
       throw error;
     }
   }

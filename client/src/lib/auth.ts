@@ -16,17 +16,10 @@ class AuthManager {
   private listeners: ((state: AuthState) => void)[] = [];
 
   constructor() {
-    // Initialize with default user for demo
+    // Start with clean unauthenticated state
     this.state = {
-      user: {
-        id: "parent-1",
-        username: "sarah.johnson",
-        role: "parent",
-        name: "Sarah Johnson",
-        email: "sarah@example.com",
-        createdAt: new Date(),
-      },
-      isAuthenticated: true,
+      user: null,
+      isAuthenticated: false,
     };
   }
 
@@ -49,37 +42,29 @@ class AuthManager {
   }
 
   async login(username: string, password: string): Promise<void> {
-    // Mock authentication for demo - in a real app this would be more secure
-    const mockUsers = {
-      'sarah.johnson': {
-        id: "parent-1",
-        username: "sarah.johnson",
-        role: "parent" as const,
-        name: "Sarah Johnson",
-        email: "sarah@example.com",
-        createdAt: new Date(),
-      },
-      'dr.martinez': {
-        id: "clinic-1",
-        username: "dr.martinez",
-        role: "clinic" as const,
-        name: "Dr. Martinez",
-        email: "martinez@clinic.com",
-        createdAt: new Date(),
-      },
-    };
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
 
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+      if (!response.ok) {
+        throw new Error('Invalid credentials');
+      }
 
-    // Check credentials (password should be "password123" for demo)
-    if (password === 'password123' && mockUsers[username as keyof typeof mockUsers]) {
+      const data = await response.json();
+      
+      // Set the authenticated user from the API response
       this.state = {
-        user: mockUsers[username as keyof typeof mockUsers],
+        user: data.user,
         isAuthenticated: true,
       };
       this.notify();
-    } else {
+    } catch (error) {
+      console.error('Login error:', error);
       throw new Error('Invalid credentials');
     }
   }

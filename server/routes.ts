@@ -15,14 +15,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { username, password } = loginSchema.parse(req.body);
       
+      // Get user from local database to find their email
       const user = await storage.getUserByUsername(username);
-      if (!user || user.password !== password) {
+      if (!user) {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      const { password: _, ...userWithoutPassword } = user;
-      res.json({ user: userWithoutPassword });
+      // For development: Try Supabase Auth first, but fall back to password comparison if email not confirmed
+      const { createClient } = await import("@supabase/supabase-js");
+      const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_ANON_KEY!);
+      
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: password
+      });
+
+      // If Supabase auth succeeds, use it
+      if (authData?.user && !authError) {
+        console.log("✅ User authenticated via Supabase Auth:", user.username);
+        const { password: _, ...userWithoutPassword } = user;
+        return res.json({ user: userWithoutPassword });
+      }
+
+      // If Supabase auth fails due to email not confirmed, fall back to password comparison
+      if (authError?.code === 'email_not_confirmed') {
+        console.log("📧 Email not confirmed, falling back to password comparison for development");
+        if (user.password === password) {
+          console.log("✅ User authenticated via password fallback:", user.username);
+          const { password: _, ...userWithoutPassword } = user;
+          return res.json({ user: userWithoutPassword });
+        }
+      }
+
+      // For any other Supabase auth error, reject
+      console.log("❌ Authentication failed:", authError);
+      return res.status(401).json({ message: "Invalid credentials" });
     } catch (error) {
+      console.error("Login error:", error);
       res.status(400).json({ message: "Invalid request data" });
     }
   });
