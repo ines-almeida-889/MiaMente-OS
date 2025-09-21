@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Heart, Stethoscope } from "lucide-react";
+import logo from "@/assets/mia-mente-no-back-low-qual.png";
 
 export default function Home() {
   return (
