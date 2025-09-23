@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { authManager } from "@/lib/auth";
+import { ChatModal } from "@/components/ui/chat-modal";
 
 export default function ClinicDashboard() {
   const [sessionNotes, setSessionNotes] = useState<{[key: string]: string}>({});
@@ -382,6 +383,7 @@ export default function ClinicDashboard() {
           </Card>
         </div>
       </div>
+      <ChatModal />
     </div>
   );
 }

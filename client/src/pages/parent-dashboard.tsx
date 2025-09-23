@@ -18,6 +18,7 @@ import {
   User
 } from "lucide-react";
 import { authManager } from "@/lib/auth";
+import { ChatModal } from "@/components/ui/chat-modal";
 
 export default function ParentDashboard() {
   const [, setLocation] = useLocation();
@@ -294,6 +295,7 @@ export default function ParentDashboard() {
         onClose={() => setShowFileUpload(false)}
         childId="child-1"
       />
+      <ChatModal />
     </div>
   );
 }

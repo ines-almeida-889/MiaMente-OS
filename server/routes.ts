@@ -3,6 +3,11 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertUserSchema, insertChildSchema, insertIntakeFormSchema, insertSessionSchema, insertClaimSchema, insertDocumentSchema } from "@shared/schema";
 import { z } from "zod";
+import OpenAI from 'openai';
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 const loginSchema = z.object({
   username: z.string(),
@@ -311,6 +316,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Chat API
+  app.post("/api/chat", async (req, res) => {
+    try {
+      const { messages } = req.body;
+      if (!Array.isArray(messages)) {
+        return res.status(400).json({ error: "Invalid messages format" });
+      }
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: messages.map((msg: { role: string; content: string }) => ({
+          role: msg.role,
+          content: msg.content,
+        })),
+      });
+
+      const response = completion.choices[0].message.content;
+      res.json({ content: response });
+    } catch (error) {
+      console.error("Chat API error:", error);
+      res.status(500).json({ error: "Failed to get response from AI" });
     }
   });
 
