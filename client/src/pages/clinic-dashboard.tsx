@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,11 +20,14 @@ import {
   Clock,
   CheckCircle
 } from "lucide-react";
+import { useLocation } from "wouter";
+import { authManager } from "@/lib/auth";
 
 export default function ClinicDashboard() {
   const [sessionNotes, setSessionNotes] = useState<{[key: string]: string}>({});
   const [goalsAchieved, setGoalsAchieved] = useState<{[key: string]: boolean}>({});
   const [homeworkAssigned, setHomeworkAssigned] = useState<{[key: string]: boolean}>({});
+  const [, navigate] = useLocation();
 
   const stats = [
     {
@@ -116,15 +119,15 @@ export default function ClinicDashboard() {
   ];
 
   const updateSessionNotes = (sessionId: string, notes: string) => {
-    setSessionNotes(prev => ({ ...prev, [sessionId]: notes }));
+    setSessionNotes((prev: {[key: string]: string}) => ({ ...prev, [sessionId]: notes }));
   };
 
   const toggleGoalsAchieved = (sessionId: string) => {
-    setGoalsAchieved(prev => ({ ...prev, [sessionId]: !prev[sessionId] }));
+    setGoalsAchieved((prev: {[key: string]: boolean}) => ({ ...prev, [sessionId]: !prev[sessionId] }));
   };
 
   const toggleHomeworkAssigned = (sessionId: string) => {
-    setHomeworkAssigned(prev => ({ ...prev, [sessionId]: !prev[sessionId] }));
+    setHomeworkAssigned((prev: {[key: string]: boolean}) => ({ ...prev, [sessionId]: !prev[sessionId] }));
   };
 
   const saveSessionNotes = (sessionId: string) => {
@@ -139,9 +142,12 @@ export default function ClinicDashboard() {
   return (
     <div className="max-w-7xl mx-auto px-4 lg:px-6 py-6">
       {/* Dashboard Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900 mb-2">Clinic Dashboard</h1>
-        <p className="text-slate-600">Manage patients, sessions, and treatment plans</p>
+      <div className="mb-8 flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 mb-2">Clinic Dashboard</h1>
+          <p className="text-slate-600">Manage patients, sessions, and treatment plans</p>
+        </div>
+        <Button variant="outline" onClick={() => { authManager.logout(); navigate('/login'); }}>Log Out</Button>
       </div>
 
       {/* Clinic Stats */}

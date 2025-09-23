@@ -17,6 +17,7 @@ import {
   CheckCircle,
   User
 } from "lucide-react";
+import { authManager } from "@/lib/auth";
 
 export default function ParentDashboard() {
   const [, setLocation] = useLocation();
@@ -107,8 +108,8 @@ export default function ParentDashboard() {
   return (
     <div className="max-w-7xl mx-auto px-4 lg:px-6 py-6 relative">
       {/* Dashboard Header */}
-      <div className="mb-8 relative">
-        <div className="flex items-center space-x-3 mb-3">
+      <div className="mb-8 flex justify-between items-center">
+        <div className="flex items-center space-x-3">
           <Heart className="h-8 w-8 text-mia-pink" />
           <div>
             <h1 className="text-3xl font-bold text-mia-navy mb-1">
@@ -117,6 +118,7 @@ export default function ParentDashboard() {
             <p className="text-mia-navy/70">Manage your child's healthcare journey with care and compassion</p>
           </div>
         </div>
+        <Button variant="outline" onClick={() => { authManager.logout(); setLocation('/login'); }}>Log Out</Button>
       </div>
 
       {/* Quick Stats Cards */}
