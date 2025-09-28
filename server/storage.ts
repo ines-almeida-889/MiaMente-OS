@@ -12,6 +12,7 @@ import { randomUUID } from "crypto";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { eq, and } from "drizzle-orm";
+import bcrypt from 'bcryptjs'; // Import bcryptjs
 // import { createClient } from "@supabase/supabase-js"; // Removed Supabase client import
 
 export interface IStorage {
@@ -235,9 +236,15 @@ export class SupabaseStorage implements IStorage {
         throw new Error("Email already exists");
       }
 
+      console.log("🔄 Hashing password for user:", insertUser.username);
+      const hashedPassword = await bcrypt.hash(insertUser.password, 10); // Hash password
+
       console.log("🔄 Attempting to insert new user into Drizzle DB:", insertUser.username);
       // Directly insert user into our Drizzle database
-      const result = await db.insert(users).values(insertUser).returning();
+      const result = await db.insert(users).values({
+        ...insertUser,
+        password: hashedPassword, // Store hashed password
+      }).returning();
       
       if (result.length === 0) {
         console.error("❌ Drizzle insert did not return any data for user:", insertUser.username);

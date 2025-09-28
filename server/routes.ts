@@ -3,6 +3,11 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertUserSchema, insertChildSchema, insertIntakeFormSchema, insertSessionSchema, insertClaimSchema, insertDocumentSchema } from "@shared/schema";
 import { z } from "zod";
+import bcrypt from 'bcryptjs'; // Import bcryptjs
+
+// const openai = new OpenAI({
+//   apiKey: process.env.OPENAI_API_KEY,
+// });
 
 const loginSchema = z.object({
   username: z.string(),
@@ -23,8 +28,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      // Direct password comparison
-      if (user.password !== password) {
+      // Compare provided password with stored hashed password
+      const passwordMatch = await bcrypt.compare(password, user.password);
+      if (!passwordMatch) {
         console.log("❌ Login failed: Incorrect password for user:", username);
         return res.status(401).json({ message: "Invalid credentials" });
       }
