@@ -551,6 +551,43 @@ export class SupabaseStorage implements IStorage {
       return false;
     }
   }
+
+  async seedTestUser() {
+    try {
+      const testUsername = "JoeSmith";
+      const testPassword = "123456";
+      const testEmail = "joe.smith@example.com";
+      const testRole = "parent"; // Defaulting to 'parent'
+      const testName = "Joe Smith";
+
+      const existingUser = await this.getUserByUsername(testUsername);
+      if (existingUser) {
+        console.log(`⚠️ Test user '${testUsername}' already exists. Skipping seeding.`);
+        return;
+      }
+
+      const hashedPassword = await bcrypt.hash(testPassword, 10);
+
+      const newUser = {
+        id: randomUUID(), // Generate a UUID for the ID
+        username: testUsername,
+        password: hashedPassword,
+        role: testRole,
+        name: testName,
+        email: testEmail,
+        createdAt: new Date(),
+      };
+
+      console.log("🔄 Seeding test user 'JoeSmith'...");
+      await db.insert(users).values(newUser);
+      console.log("✅ Test user 'JoeSmith' seeded successfully.");
+    } catch (error) {
+      console.error("❌ Error seeding test user:", error);
+    }
+  }
 }
 
 export const storage = new SupabaseStorage();
+
+// Temporarily call seedTestUser on storage initialization
+storage.seedTestUser();
