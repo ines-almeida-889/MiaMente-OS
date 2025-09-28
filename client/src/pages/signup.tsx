@@ -10,6 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { ArrowLeft, Heart, Stethoscope, Eye, EyeOff } from "lucide-react";
 import { Link } from "wouter";
 import { authManager } from "@/lib/auth";
+import { useToast } from "@/hooks/use-toast"; // Import useToast
 
 const signupSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
@@ -28,6 +29,7 @@ export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast(); // Initialize useToast
 
   const form = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
@@ -91,7 +93,12 @@ export default function Signup() {
       }
     } catch (error) {
       console.error("Signup error:", error);
-      alert(`Failed to create account: ${error instanceof Error ? error.message : "Unknown error"}`);
+      // Update error handling to use toast
+      toast({
+        title: "Account creation failed",
+        description: error instanceof Error ? error.message : "An unknown error occurred.",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }

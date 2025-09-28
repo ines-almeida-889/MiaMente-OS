@@ -21,42 +21,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { username, password } = loginSchema.parse(req.body);
       
       // Get user from local database to find their email
-      const user = await storage.getUserByUsername(username);
+      let user = await storage.getUserByUsername(username);
       if (!user) {
-        return res.status(401).json({ message: "Invalid credentials" });
+        // Try getting by email if username not found, as Supabase authenticates by email
+        const userByEmail = await storage.getUserByEmail(username); // Username might be email
+        if (!userByEmail) {
+          console.log("❌ User not found by username or email:", username);
+          return res.status(401).json({ message: "Invalid credentials" });
+        }
+        user = userByEmail;
       }
 
-      // For development: Try Supabase Auth first, but fall back to password comparison if email not confirmed
       const { createClient } = await import("@supabase/supabase-js");
       const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_ANON_KEY!);
       
+      console.log("🔄 Attempting to authenticate via Supabase Auth for user:", user.email);
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email: user.email,
         password: password
       });
 
-      // If Supabase auth succeeds, use it
-      if (authData?.user && !authError) {
-        console.log("✅ User authenticated via Supabase Auth:", user.username);
-        const { password: _, ...userWithoutPassword } = user;
-        return res.json({ user: userWithoutPassword });
+      if (authError) {
+        console.error("❌ Supabase authentication failed:", authError);
+        // Specific error messages from Supabase should not be exposed directly to the frontend
+        return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      // If Supabase auth fails due to email not confirmed, fall back to password comparison
-      if (authError?.code === 'email_not_confirmed') {
-        console.log("📧 Email not confirmed, falling back to password comparison for development");
-        if (user.password === password) {
-          console.log("✅ User authenticated via password fallback:", user.username);
-          const { password: _, ...userWithoutPassword } = user;
-          return res.json({ user: userWithoutPassword });
-        }
+      if (!authData?.user) {
+        console.error("❌ Supabase authentication succeeded but no user data returned.");
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      
+      // If Supabase auth succeeds, get user details from our database using Supabase ID
+      const authenticatedUser = await storage.getUser(authData.user.id);
+      if (!authenticatedUser) {
+        console.error("❌ User authenticated via Supabase, but not found in local DB:", authData.user.id);
+        // This indicates a data inconsistency, but user is authenticated
+        return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      // For any other Supabase auth error, reject
-      console.log("❌ Authentication failed:", authError);
-      return res.status(401).json({ message: "Invalid credentials" });
+      console.log("✅ User authenticated successfully:", authenticatedUser.username);
+      const { password: _, ...userWithoutPassword } = authenticatedUser;
+      return res.json({ user: userWithoutPassword });
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("❌ Login error:", error);
       res.status(400).json({ message: "Invalid request data" });
     }
   });
@@ -65,17 +73,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userData = insertUserSchema.parse(req.body);
       
-      // Check if user already exists
-      const existingUser = await storage.getUserByUsername(userData.username);
-      if (existingUser) {
+      // Check if username already exists in our Drizzle DB
+      const existingUserByUsername = await storage.getUserByUsername(userData.username);
+      if (existingUserByUsername) {
+        console.log("❌ Registration failed: Username already exists in DB.", userData.username);
         return res.status(409).json({ message: "Username already exists" });
       }
 
-      const user = await storage.createUser(userData);
-      const { password: _, ...userWithoutPassword } = user;
-      res.status(201).json({ user: userWithoutPassword });
+      // Check if email already exists in our Drizzle DB
+      const existingUserByEmail = await storage.getUserByEmail(userData.email);
+      if (existingUserByEmail) {
+        console.log("❌ Registration failed: Email already exists in DB.", userData.email);
+        return res.status(409).json({ message: "Email already exists" });
+      }
+
+      // Proceed to create user in storage (which now handles Supabase Auth registration)
+      const { password, ...userWithoutPasswordForDrizzle } = userData; // Extract password for Supabase Auth
+      const user = await storage.createUser(userWithoutPasswordForDrizzle, password);
+      // const { password: _, ...userWithoutPassword } = user; // password already omitted by type Omit<InsertUser, 'password'>
+      console.log("✅ User registered successfully.", user.username);
+      res.status(201).json({ user: userWithoutPasswordForDrizzle }); // Return user without password
     } catch (error) {
-      res.status(400).json({ message: "Invalid request data" });
+      console.error("❌ Registration error:", error);
+      // Distinguish between different error types if possible
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid registration data", errors: error.errors });
+      } else if (error instanceof Error && error.message.includes("Authentication error")) {
+        // Error from Supabase Auth during createUser
+        return res.status(400).json({ message: error.message });
+      } else if (error instanceof Error && (error.message.includes("Username already exists") || error.message.includes("Email already exists"))) {
+        return res.status(409).json({ message: error.message });
+      }
+      res.status(500).json({ message: "Failed to create account" });
     }
   });
 

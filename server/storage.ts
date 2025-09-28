@@ -19,7 +19,7 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  createUser(user: Omit<InsertUser, 'password'>, password: string): Promise<User>;
   
   // Child methods
   getChild(id: string): Promise<Child | undefined>;
@@ -207,7 +207,7 @@ export class SupabaseStorage implements IStorage {
     }
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
+  async createUser(insertUser: Omit<InsertUser, 'password'>, password: string): Promise<User> {
     let createdAuthUserId: string | null = null;
     
     try {
@@ -227,7 +227,7 @@ export class SupabaseStorage implements IStorage {
       // Create user in Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: insertUser.email,
-        password: insertUser.password,
+        password: password,
         options: {
           data: {
             name: insertUser.name,
@@ -274,6 +274,11 @@ export class SupabaseStorage implements IStorage {
           console.error("⚠️  User will need manual cleanup in Supabase Auth dashboard");
         } catch (rollbackError) {
           console.error("❌ Failed to rollback Supabase Auth user:", rollbackError);
+        } finally {
+          // In a real application, you'd use the Supabase admin client here to delete the user
+          // For example: `await supabaseAdmin.auth.admin.deleteUser(createdAuthUserId);`
+          // This requires a `supabaseAdmin` client initialized with the `SUPABASE_SERVICE_ROLE_KEY`
+          // For now, manual cleanup is indicated.
         }
       }
       
