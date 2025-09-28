@@ -235,16 +235,20 @@ export class SupabaseStorage implements IStorage {
         throw new Error("Email already exists");
       }
 
-      console.log("🔄 Creating user in local database...");
-      
+      console.log("🔄 Attempting to insert new user into Drizzle DB:", insertUser.username);
       // Directly insert user into our Drizzle database
       const result = await db.insert(users).values(insertUser).returning();
-      console.log("✅ User created in database:", result[0]);
+      
+      if (result.length === 0) {
+        console.error("❌ Drizzle insert did not return any data for user:", insertUser.username);
+        throw new Error("Failed to create user in database.");
+      }
+      
+      console.log("✅ User created in database:", result[0].username, "with ID:", result[0].id);
       
       return result[0];
     } catch (error) {
-      console.error("❌ Error creating user:", error);
-      // No Supabase Auth user to rollback
+      console.error("❌ Error during createUser in storage:", error);
       throw error;
     }
   }

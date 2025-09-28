@@ -316,34 +316,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Chat API
-  app.post("/api/chat", async (req, res) => {
-    try {
-      const { messages } = req.body;
-      if (!Array.isArray(messages)) {
-        return res.status(400).json({ error: "Invalid messages format" });
-      }
-
-      if (!process.env.OPENAI_API_KEY) {
-        console.error("OpenAI API key is not configured");
-        return res.status(500).json({ error: "The assistant is currently unavailable. Please try again later." });
-      }
-
-      // const completion = await openai.chat.completions.create({
-      //   model: "gpt-3.5-turbo",
-      //   messages: messages.map((msg: { role: string; content: string }) => ({
-      //     role: msg.role,
-      //     content: msg.content,
-      //   })),
-      // });
-
-      // const response = completion.choices[0].message.content;
-      res.json({ content: "Chat API is currently unavailable." }); // Placeholder response
-    } catch (error) {
-      console.error("Chat API error:", error);
-      res.status(500).json({ error: "The assistant is currently unavailable. Please try again later." });
-    }
-  });
+  // Chat API - REMOVED since Supabase authentication is no longer used, and OpenAI is not configured.
+  // If chatbot functionality is desired, this section will need to be re-added and configured separately.
 
   const httpServer = createServer(app);
   return httpServer;
