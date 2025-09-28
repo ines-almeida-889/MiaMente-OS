@@ -12,14 +12,14 @@ import { randomUUID } from "crypto";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { eq, and } from "drizzle-orm";
-import { createClient } from "@supabase/supabase-js";
+// import { createClient } from "@supabase/supabase-js"; // Removed Supabase client import
 
 export interface IStorage {
   // User methods
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
-  createUser(user: Omit<InsertUser, 'password'>, password: string): Promise<User>;
+  createUser(user: InsertUser): Promise<User>; // Modified: accepts InsertUser (with password)
   
   // Child methods
   getChild(id: string): Promise<Child | undefined>;
@@ -62,9 +62,14 @@ export interface IStorage {
 }
 
 // Initialize PostgreSQL connection using node-postgres
-const databaseUrl = process.env.SUPABASE_DATABASE_URL || process.env.DATABASE_URL!;
+const databaseUrl = process.env.SUPABASE_DATABASE_URL || process.env.DATABASE_URL;
 
-console.log('🔄 Creating PostgreSQL connection to:', databaseUrl.substring(0, 80) + '...');
+if (!databaseUrl) {
+  console.error("❌ DATABASE_URL or SUPABASE_DATABASE_URL is not configured.");
+  throw new Error("Database URL is not configured.");
+}
+
+console.log('🔄 Creating PostgreSQL connection to:', databaseUrl.substring(0, Math.min(databaseUrl.length, 80)) + '...');
 
 const pool = new Pool({
   connectionString: databaseUrl,
@@ -75,11 +80,19 @@ const pool = new Pool({
 
 const db = drizzle(pool);
 
-// Initialize Supabase client for authentication
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_ANON_KEY!
-);
+// Initialize Supabase client for authentication - REMOVED
+// const supabaseUrl = process.env.SUPABASE_URL;
+// const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+
+// if (!supabaseUrl || !supabaseAnonKey) {
+//   console.error("❌ SUPABASE_URL or SUPABASE_ANON_KEY is not configured.");
+//   throw new Error("Supabase URL and Anon Key must be configured.");
+// }
+
+// const supabase = createClient(
+//   supabaseUrl,
+//   supabaseAnonKey
+// );
 
 export class SupabaseStorage implements IStorage {
   constructor() {
@@ -207,8 +220,8 @@ export class SupabaseStorage implements IStorage {
     }
   }
 
-  async createUser(insertUser: Omit<InsertUser, 'password'>, password: string): Promise<User> {
-    let createdAuthUserId: string | null = null;
+  async createUser(insertUser: InsertUser): Promise<User> {
+    // let createdAuthUserId: string | null = null; // No longer needed
     
     try {
       // First check if user already exists in our database
@@ -222,66 +235,16 @@ export class SupabaseStorage implements IStorage {
         throw new Error("Email already exists");
       }
 
-      console.log("🔄 Creating user in Supabase Auth...");
-      
-      // Create user in Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: insertUser.email,
-        password: password,
-        options: {
-          data: {
-            name: insertUser.name,
-            role: insertUser.role,
-            username: insertUser.username
-          },
-          emailRedirectTo: undefined // Skip email confirmation for development
-        }
-      });
-
-      if (authError) {
-        console.error("Supabase auth error:", authError);
-        throw new Error(`Authentication error: ${authError.message}`);
-      }
-
-      if (!authData.user) {
-        throw new Error("Failed to create user in Supabase Auth");
-      }
-
-      createdAuthUserId = authData.user.id;
-      console.log("✅ User created in Supabase Auth with ID:", createdAuthUserId);
-
-      // Create user in our database table with the same ID from Supabase Auth
-      const userToInsert = {
-        ...insertUser,
-        id: authData.user.id // Use Supabase Auth user ID
-      };
-
       console.log("🔄 Creating user in local database...");
-      const result = await db.insert(users).values(userToInsert).returning();
-      console.log("✅ User created in both Supabase Auth and database:", result[0]);
+      
+      // Directly insert user into our Drizzle database
+      const result = await db.insert(users).values(insertUser).returning();
+      console.log("✅ User created in database:", result[0]);
       
       return result[0];
     } catch (error) {
       console.error("❌ Error creating user:", error);
-      
-      // If we created a Supabase Auth user but local DB failed, rollback
-      if (createdAuthUserId) {
-        console.log("🔄 Rolling back Supabase Auth user creation...");
-        try {
-          // Use admin API to delete the user (requires service role key)
-          // For now, log the issue - in production you'd use admin API
-          console.error("⚠️  ROLLBACK NEEDED: Supabase Auth user", createdAuthUserId, "exists but local DB failed");
-          console.error("⚠️  User will need manual cleanup in Supabase Auth dashboard");
-        } catch (rollbackError) {
-          console.error("❌ Failed to rollback Supabase Auth user:", rollbackError);
-        } finally {
-          // In a real application, you'd use the Supabase admin client here to delete the user
-          // For example: `await supabaseAdmin.auth.admin.deleteUser(createdAuthUserId);`
-          // This requires a `supabaseAdmin` client initialized with the `SUPABASE_SERVICE_ROLE_KEY`
-          // For now, manual cleanup is indicated.
-        }
-      }
-      
+      // No Supabase Auth user to rollback
       throw error;
     }
   }

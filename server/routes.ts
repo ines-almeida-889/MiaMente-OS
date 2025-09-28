@@ -3,11 +3,6 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertUserSchema, insertChildSchema, insertIntakeFormSchema, insertSessionSchema, insertClaimSchema, insertDocumentSchema } from "@shared/schema";
 import { z } from "zod";
-import OpenAI from 'openai';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 const loginSchema = z.object({
   username: z.string(),
@@ -18,50 +13,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
   app.post("/api/auth/login", async (req, res) => {
     try {
+      // Removed Supabase environment variable checks
       const { username, password } = loginSchema.parse(req.body);
       
-      // Get user from local database to find their email
-      let user = await storage.getUserByUsername(username);
+      // Get user from local database
+      const user = await storage.getUserByUsername(username);
       if (!user) {
-        // Try getting by email if username not found, as Supabase authenticates by email
-        const userByEmail = await storage.getUserByEmail(username); // Username might be email
-        if (!userByEmail) {
-          console.log("❌ User not found by username or email:", username);
-          return res.status(401).json({ message: "Invalid credentials" });
-        }
-        user = userByEmail;
-      }
-
-      const { createClient } = await import("@supabase/supabase-js");
-      const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_ANON_KEY!);
-      
-      console.log("🔄 Attempting to authenticate via Supabase Auth for user:", user.email);
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email: user.email,
-        password: password
-      });
-
-      if (authError) {
-        console.error("❌ Supabase authentication failed:", authError);
-        // Specific error messages from Supabase should not be exposed directly to the frontend
+        console.log("❌ Login failed: User not found.", username);
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      if (!authData?.user) {
-        console.error("❌ Supabase authentication succeeded but no user data returned.");
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-      
-      // If Supabase auth succeeds, get user details from our database using Supabase ID
-      const authenticatedUser = await storage.getUser(authData.user.id);
-      if (!authenticatedUser) {
-        console.error("❌ User authenticated via Supabase, but not found in local DB:", authData.user.id);
-        // This indicates a data inconsistency, but user is authenticated
+      // Direct password comparison
+      if (user.password !== password) {
+        console.log("❌ Login failed: Incorrect password for user:", username);
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      console.log("✅ User authenticated successfully:", authenticatedUser.username);
-      const { password: _, ...userWithoutPassword } = authenticatedUser;
+      console.log("✅ User authenticated successfully:", user.username);
+      // Omit password from the returned user object for security
+      const { password: _, ...userWithoutPassword } = user;
       return res.json({ user: userWithoutPassword });
     } catch (error) {
       console.error("❌ Login error:", error);
@@ -71,36 +41,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/auth/register", async (req, res) => {
     try {
+      // Removed Supabase environment variable checks
       const userData = insertUserSchema.parse(req.body);
       
       // Check if username already exists in our Drizzle DB
       const existingUserByUsername = await storage.getUserByUsername(userData.username);
       if (existingUserByUsername) {
-        console.log("❌ Registration failed: Username already exists in DB.", userData.username);
+        console.log("❌ Registration failed: Username already exists.", userData.username);
         return res.status(409).json({ message: "Username already exists" });
       }
 
       // Check if email already exists in our Drizzle DB
       const existingUserByEmail = await storage.getUserByEmail(userData.email);
       if (existingUserByEmail) {
-        console.log("❌ Registration failed: Email already exists in DB.", userData.email);
+        console.log("❌ Registration failed: Email already exists.", userData.email);
         return res.status(409).json({ message: "Email already exists" });
       }
 
-      // Proceed to create user in storage (which now handles Supabase Auth registration)
-      const { password, ...userWithoutPasswordForDrizzle } = userData; // Extract password for Supabase Auth
-      const user = await storage.createUser(userWithoutPasswordForDrizzle, password);
-      // const { password: _, ...userWithoutPassword } = user; // password already omitted by type Omit<InsertUser, 'password'>
+      // Proceed to create user in storage (direct Drizzle insert)
+      const user = await storage.createUser(userData);
+      
       console.log("✅ User registered successfully.", user.username);
-      res.status(201).json({ user: userWithoutPasswordForDrizzle }); // Return user without password
+      // Omit password from the returned user object for security
+      const { password: _, ...userWithoutPassword } = user;
+      res.status(201).json({ user: userWithoutPassword });
     } catch (error) {
       console.error("❌ Registration error:", error);
-      // Distinguish between different error types if possible
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid registration data", errors: error.errors });
-      } else if (error instanceof Error && error.message.includes("Authentication error")) {
-        // Error from Supabase Auth during createUser
-        return res.status(400).json({ message: error.message });
       } else if (error instanceof Error && (error.message.includes("Username already exists") || error.message.includes("Email already exists"))) {
         return res.status(409).json({ message: error.message });
       }
@@ -361,16 +329,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ error: "The assistant is currently unavailable. Please try again later." });
       }
 
-      const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: messages.map((msg: { role: string; content: string }) => ({
-          role: msg.role,
-          content: msg.content,
-        })),
-      });
+      // const completion = await openai.chat.completions.create({
+      //   model: "gpt-3.5-turbo",
+      //   messages: messages.map((msg: { role: string; content: string }) => ({
+      //     role: msg.role,
+      //     content: msg.content,
+      //   })),
+      // });
 
-      const response = completion.choices[0].message.content;
-      res.json({ content: response });
+      // const response = completion.choices[0].message.content;
+      res.json({ content: "Chat API is currently unavailable." }); // Placeholder response
     } catch (error) {
       console.error("Chat API error:", error);
       res.status(500).json({ error: "The assistant is currently unavailable. Please try again later." });
