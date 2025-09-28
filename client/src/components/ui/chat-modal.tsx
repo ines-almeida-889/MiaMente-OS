@@ -40,10 +40,13 @@ export function ChatModal() {
         body: JSON.stringify({ messages: newMessages }),
       });
 
-      if (!response.ok) throw new Error('Failed to get response');
-
       const data = await response.json();
-      setMessages([...newMessages, { role: 'assistant', content: data.content }]);
+
+      if (response.ok) {
+        setMessages([...newMessages, { role: 'assistant', content: data.content }]);
+      } else {
+        setMessages([...newMessages, { role: 'assistant', content: data.error || 'Sorry, something went wrong.' }]);
+      }
     } catch (error) {
       console.error('Chat error:', error);
       setMessages([...newMessages, { role: 'assistant', content: 'Sorry, something went wrong.' }]);

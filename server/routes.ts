@@ -327,6 +327,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid messages format" });
       }
 
+      if (!process.env.OPENAI_API_KEY) {
+        console.error("OpenAI API key is not configured");
+        return res.status(500).json({ error: "The assistant is currently unavailable. Please try again later." });
+      }
+
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: messages.map((msg: { role: string; content: string }) => ({
@@ -339,7 +344,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ content: response });
     } catch (error) {
       console.error("Chat API error:", error);
-      res.status(500).json({ error: "Failed to get response from AI" });
+      res.status(500).json({ error: "The assistant is currently unavailable. Please try again later." });
     }
   });
 
